@@ -3,6 +3,7 @@ package org.example.diplom.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.diplom.dto.FileInfo;
 import org.example.diplom.dto.RenameRequest;
+import org.example.diplom.model.CloudFile;
 import org.example.diplom.service.FileService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -75,8 +77,13 @@ public class FileController {
     public ResponseEntity<List<FileInfo>> list(
             @RequestParam("limit") int limit) {
 
-        List<FileInfo> files = fileService.listFiles(currentUser(), limit);
-        return ResponseEntity.ok(files);
+        List<CloudFile> files = fileService.listFiles(currentUser(), limit);
+
+        List<FileInfo> fileInfoDTO = files.stream()
+                .map(file -> new FileInfo(file.getFilename(), file.getSize()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(fileInfoDTO);
     }
 
     @ExceptionHandler(FileNotFoundException.class)

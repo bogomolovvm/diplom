@@ -86,11 +86,10 @@ public class FileService {
     }
 
 
-    public List<FileInfo> listFiles(String username, int limit) {
+    public List<CloudFile> listFiles(String username, int limit) {
         return fileRepository.findAllByUsername(username)
                 .stream()
                 .limit(limit)
-                .map(f -> new FileInfo(f.getFilename(), f.getSize()))
                 .collect(Collectors.toList());
     }
 
