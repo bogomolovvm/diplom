@@ -26,7 +26,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @AutoConfigureRestTestClient
-public class AuthIntegrationTest extends BaseIntegrationTest{
+public class AuthIntegrationTest{
 
     @Container
     static PostgreSQLContainer<?> postgres =

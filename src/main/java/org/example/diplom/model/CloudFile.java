@@ -35,6 +35,10 @@ public class CloudFile {
 
     @Column(name = "storage_path", nullable = false, length = 512)
     private String storagePath;
+
+    public void set() {
+
+    }
 }
 
 
