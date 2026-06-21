@@ -26,3 +26,6 @@ spring:
       max-request-size: 50MB
 app:
   upload-dir: ${APP_UPLOAD_DIR:./uploads}
+logging:
+  level:
+    root: debug

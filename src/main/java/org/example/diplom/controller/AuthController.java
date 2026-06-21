@@ -1,6 +1,7 @@
 package org.example.diplom.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.diplom.dto.LoginRequest;
 import org.example.diplom.dto.LoginResponse;
 import org.example.diplom.service.TokenService;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -22,6 +24,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        log.info("POST /login — user: {}", request.getLogin());
+
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getLogin(),
@@ -34,6 +38,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("auth-token") String token) {
+        log.info("POST /logout");
+
         tokenService.removeToken(token);
         return ResponseEntity.ok().build();
     }

@@ -1,8 +1,10 @@
 package org.example.diplom.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.diplom.dto.FileInfo;
 import org.example.diplom.dto.RenameRequest;
+import org.example.diplom.model.CloudFile;
 import org.example.diplom.service.FileService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -18,9 +20,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class FileController {
 
     private final FileService fileService;
@@ -36,6 +40,7 @@ public class FileController {
             @RequestParam("filename") String filename,
             @RequestParam(value = "hash", required = false) String hash,
             @RequestParam("file") MultipartFile file) throws IOException {
+        log.info("POST /file — filename: {}, user: {}", filename, currentUser());
 
         fileService.save(currentUser(), filename, hash, file);
         return ResponseEntity.ok().build();
@@ -44,6 +49,7 @@ public class FileController {
     @GetMapping("/file")
     public ResponseEntity<Resource> download(
             @RequestParam("filename") String filename) throws IOException {
+        log.info("GET /file — filename: {}, user: {}", filename, currentUser());
 
         Resource resource = fileService.download(currentUser(), filename);
 
@@ -57,6 +63,7 @@ public class FileController {
     @DeleteMapping("/file")
     public ResponseEntity<Void> delete(
             @RequestParam("filename") String filename) throws IOException {
+        log.info("DELETE /file — filename: {}, user: {}", filename, currentUser());
 
         fileService.delete(currentUser(), filename);
         return ResponseEntity.ok().build();
@@ -66,6 +73,7 @@ public class FileController {
     public ResponseEntity<Void> rename(
             @RequestParam("filename") String filename,
             @RequestBody RenameRequest request) throws IOException {
+        log.info("PUT /file — filename: {}, user: {}, newName: {}", filename, currentUser(), request.getName());
 
         fileService.rename(currentUser(), filename, request.getName());
         return ResponseEntity.ok().build();
@@ -74,9 +82,15 @@ public class FileController {
     @GetMapping("/list")
     public ResponseEntity<List<FileInfo>> list(
             @RequestParam("limit") int limit) {
+        log.info("GET /list — limit: {}, user: {}", limit, currentUser());
 
-        List<FileInfo> files = fileService.listFiles(currentUser(), limit);
-        return ResponseEntity.ok(files);
+        List<CloudFile> files = fileService.listFiles(currentUser(), limit);
+
+        List<FileInfo> fileInfoDTO = files.stream()
+                .map(file -> new FileInfo(file.getFilename(), file.getSize()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(fileInfoDTO);
     }
 
     @ExceptionHandler(FileNotFoundException.class)
