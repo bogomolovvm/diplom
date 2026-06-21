@@ -76,10 +76,8 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
         return objectMapper.readTree(response).get("auth-token").asText();
     }
 
-    // ─── POST /file ──────────────────────────────────────────────────────────
-
     @Test
-    @DisplayName("POST /file — успешная загрузка файла")
+    @DisplayName("POST /file - успешная загрузка файла")
     void uploadFile_success() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.txt",
@@ -96,7 +94,7 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("POST /file — 401 без токена")
+    @DisplayName("POST /file - 401 без токена")
     void uploadFile_unauthorized() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.txt",
@@ -110,10 +108,8 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ─── GET /list ───────────────────────────────────────────────────────────
-
     @Test
-    @DisplayName("GET /list — возвращает загруженный файл")
+    @DisplayName("GET /list - возвращает загруженный файл")
     void listFiles_returnsUploadedFile() throws Exception {
         // Сначала загружаем
         uploadTestFile("report.txt", "some content");
@@ -129,7 +125,7 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /list — пустой список если файлов нет")
+    @DisplayName("GET /list - пустой список если файлов нет")
     void listFiles_empty() throws Exception {
         mockMvc.perform(get("/list")
                         .header("auth-token", authToken)
@@ -139,17 +135,15 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /list — 401 без токена")
+    @DisplayName("GET /list - 401 без токена")
     void listFiles_unauthorized() throws Exception {
         mockMvc.perform(get("/list")
                         .param("limit", "10"))
                 .andExpect(status().isUnauthorized());
     }
 
-    // ─── GET /file ───────────────────────────────────────────────────────────
-
     @Test
-    @DisplayName("GET /file — скачивание существующего файла")
+    @DisplayName("GET /file - скачивание существующего файла")
     void downloadFile_success() throws Exception {
         uploadTestFile("download-me.txt", "file content here");
 
@@ -165,7 +159,7 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /file — 400 если файл не существует")
+    @DisplayName("GET /file - 400 если файл не существует")
     void downloadFile_notFound() throws Exception {
         mockMvc.perform(get("/file")
                         .header("auth-token", authToken)
@@ -174,17 +168,15 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /file — 401 без токена")
+    @DisplayName("GET /file - 401 без токена")
     void downloadFile_unauthorized() throws Exception {
         mockMvc.perform(get("/file")
                         .param("filename", "some.txt"))
                 .andExpect(status().isUnauthorized());
     }
 
-    // ─── DELETE /file ────────────────────────────────────────────────────────
-
     @Test
-    @DisplayName("DELETE /file — успешное удаление")
+    @DisplayName("DELETE /file - успешное удаление")
     void deleteFile_success() throws Exception {
         uploadTestFile("to-delete.txt", "bye bye");
 
@@ -201,7 +193,7 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("DELETE /file — 400 если файл не найден")
+    @DisplayName("DELETE /file - 400 если файл не найден")
     void deleteFile_notFound() throws Exception {
         mockMvc.perform(delete("/file")
                         .header("auth-token", authToken)
@@ -217,10 +209,8 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ─── PUT /file ───────────────────────────────────────────────────────────
-
     @Test
-    @DisplayName("PUT /file — успешное переименование")
+    @DisplayName("PUT /file - успешное переименование")
     void renameFile_success() throws Exception {
         uploadTestFile("old-name.txt", "content");
 
@@ -241,7 +231,7 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("PUT /file — 400 если файл не найден")
+    @DisplayName("PUT /file - 400 если файл не найден")
     void renameFile_notFound() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of("name", "new-name.txt"));
 
@@ -254,7 +244,7 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("PUT /file — 401 без токена")
+    @DisplayName("PUT /file - 401 без токена")
     void renameFile_unauthorized() throws Exception {
         String body = objectMapper.writeValueAsString(Map.of("name", "new.txt"));
 
@@ -272,11 +262,11 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
     void userIsolation_cannotSeeOthersFiles() throws Exception {
         // Второй пользователь загружает файл
         User other = new User();
-        other.setUsername("otheruser");
-        other.setPassword(passwordEncoder.encode("pass"));
+        other.setUsername("user");
+        other.setPassword(passwordEncoder.encode("user"));
         userRepository.save(other);
 
-        String otherToken = login("otheruser", "pass");
+        String otherToken = login("user", "user");
         uploadTestFileWithToken(otherToken, "secret.txt", "private data");
 
         // Первый пользователь не видит его файл
@@ -285,8 +275,6 @@ class FileControllerIntegrationTest extends BaseIntegrationTest {
                         .param("limit", "10"))
                 .andExpect(jsonPath("$", hasSize(0)));
     }
-
-    // ─── Вспомогательные методы ──────────────────────────────────────────────
 
     private void uploadTestFile(String filename, String content) throws Exception {
         uploadTestFileWithToken(authToken, filename, content);

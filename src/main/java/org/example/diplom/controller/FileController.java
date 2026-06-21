@@ -34,7 +34,7 @@ public class FileController {
     @PostMapping("/file")
     public ResponseEntity<Void> upload(
             @RequestParam("filename") String filename,
-            @RequestParam("hash") String hash,
+            @RequestParam(value = "hash", required = false) String hash,
             @RequestParam("file") MultipartFile file) throws IOException {
 
         fileService.save(currentUser(), filename, hash, file);
