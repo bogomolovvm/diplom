@@ -30,6 +30,10 @@ public class TokenAuthFilter extends OncePerRequestFilter {
 
         String token = request.getHeader("auth-token");
 
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             tokenService.getUsernameByToken(token).ifPresent(username -> {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
